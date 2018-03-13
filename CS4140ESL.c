@@ -10,9 +10,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 // Defines:
-#define VERBOSE 0
+#define VERBOSE 1
 
 /**
  * Defines how the linked list should look like.
@@ -30,7 +32,7 @@ typedef struct _wordList {
  * @param nextInLine
  * @param nextLine
  * @param theLetter
- * @return
+ * @return A pointer to the newly created element.
  */
 wordList *createElement(wordList *nextInLine, wordList *nextLine, char theLetter){
 	wordList* newElement = malloc(sizeof(wordList));
@@ -46,7 +48,7 @@ wordList *createElement(wordList *nextInLine, wordList *nextLine, char theLetter
  * It pre-sorts the list [0-9] -> [a-z].
  * @param Links to the head of the linked list.
  * @param A pointer to the character array of the word.
- * @param This is the length of the character array of the word.
+ * @param This is the length of the character array of the word. Words longer than 255 characters are not expected [1].
  */
 void listHandler(wordList *head, char *theWord, uint8_t wordLength) {
 #if VERBOSE > 20
@@ -155,6 +157,44 @@ void printStructure(wordList *lst, char* previousLetters,
 }
 
 /**
+ * Get the input and get the workers their share of the work.
+ * @param The list to add the results to.
+ */
+void scanRoutine(wordList *lst){
+#if VERBOSE > 20
+	printf("%s\r\n", __FUNCTION__);
+#endif
+	char c;
+	char word[255];
+	uint8_t length = 0;
+	// Read per character
+	while((c = getchar()) != EOF){
+		c |= (1<<5);	// All lowercase
+		// Add to word if it is a character
+		if( ((c >= 48) && (c <= 57)) || ((c >= 97) && (c <= 122)) ){
+			word[length] = c;
+			length++;
+		}
+		// End of word
+		else{
+			// If there is a word in the buffer, add it.
+			if(length){
+				printf(">\t");
+				for(uint8_t i = 0; i<length; i++)
+					printf("%c",word[i]);
+				printf("\r\n");
+				listHandler(lst, word, length);
+				length = 0;
+			}
+			// Else do nothing
+		}
+	}
+#if VERBOSE >= 1
+	printf("EOF\r\n");
+#endif
+}
+
+/**
  * This is the main function.
  * No input arguments have been implemented.
  */
@@ -162,30 +202,16 @@ int main(int argc, char **argv) {
 #if VERBOSE > 20
 	printf("%s\r\n", __FUNCTION__);
 #endif
-
-#if 0
-	wordList myWordList6 = { 0, 0, 'e', 1 };
-	wordList myWordList5 = { 0, &myWordList6, 'j', 0 };
-	wordList myWordList4 = { 0, 0, 's', 4 };
-	wordList myWordList3 = { &myWordList4, &myWordList5, 'p', 1 };
-	wordList myWordList2 = { 0, &myWordList3, 'a', 0 };
-	wordList myWordList = { 0, &myWordList2, 'a', 2 };
-#else
+	// Create root
 	wordList myWordList = {0,0,'0',0};
-	listHandler(&myWordList, "i", 1);
-	listHandler(&myWordList, "a", 1);
-	listHandler(&myWordList, "aap", 3);
-	listHandler(&myWordList, "aapje", 5);
-	listHandler(&myWordList, "iphone", 6);
-	listHandler(&myWordList, "aas", 3);
-#endif
+
+	// Read the input
+	scanRoutine(&myWordList);
 
 	// Print the output
 	printStructure(&myWordList, 0, 0);
 
-	unsigned long long int s =  sizeof(wordList);
-	printf("Size:\t%u\r\n",(unsigned int)s);
-
+	// Free the memory :D
 	free(myWordList.nextInLine);
 	free(myWordList.nextLine);
 
