@@ -9,6 +9,7 @@
 // Load some standard functions and types.
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // Defines:
 #define VERBOSE 0
@@ -22,6 +23,23 @@ typedef struct _wordList {
 	char theLetter;	// Could be compressed to 36 unique characters (62 if capitals are considered).
 	uint16_t count;	// Assuming words do not occur more than 65536 times
 } wordList;
+
+/**
+ * Create a new element of the list structure.
+ * Count is always initialized to zero.
+ * @param nextInLine
+ * @param nextLine
+ * @param theLetter
+ * @return
+ */
+wordList *createElement(wordList *nextInLine, wordList *nextLine, char theLetter){
+	wordList* newElement = malloc(sizeof(wordList));
+	newElement->nextInLine = nextInLine;
+	newElement->nextLine = nextLine;
+	newElement->theLetter = theLetter;
+	newElement->count = 0;
+	return newElement;
+}
 
 /**
  * This is the linked list handler.
@@ -49,15 +67,11 @@ void listHandler(wordList *head, char *theWord, uint8_t wordLength) {
 			}
 			// Create on missing line
 			if (!current->nextLine) {
-				printf("[%d] create newLine:\t{ %p, %p, %c, %d }\r\n", depth, 0, 0, theWord[depth], 0);
-				wordList newLine = { 0, 0, theWord[depth], 0 };
-				current->nextLine = &newLine;
+				current->nextLine = createElement(0, 0, theWord[depth]);
 			}
 			// Insert before
 			if (current->nextLine->theLetter > theWord[depth]){
-				printf("[%d] insert newLine:\t{ %p, %p, %c, %d }\r\n", depth, current->nextLine, 0, theWord[depth], 0);
-				wordList newLine = { current->nextLine, 0, theWord[depth], 0 };
-				current->nextLine = &newLine;
+				current->nextLine = createElement(current->nextLine, 0, theWord[depth]);
 			}
 			// Jump to next line
 			current = current->nextLine;
@@ -69,17 +83,13 @@ void listHandler(wordList *head, char *theWord, uint8_t wordLength) {
 				// Check if the next character of the line is bigger so that structure in between can be made.
 				if (current->nextInLine->theLetter > theWord[depth]) {
 					// Insert in between
-					printf("[%d] insert newInLine:\t{ %p, %p, %c, %d }\r\n", depth, current->nextInLine, 0, theWord[depth], 0);
-					wordList newInLine = { current->nextInLine, 0, theWord[depth], 0 };
-					current->nextInLine = &newInLine;
+					current->nextInLine = createElement(current->nextInLine, 0, theWord[depth]);
 				}
 				// Else we should go to the next line, which is always done.
 			}
 			// There is no new in line, let's create one.
 			else {
-				printf("[%d] create newInLine:\t{ %p, %p, %c, %d }\r\n", depth, current->nextInLine, 0, theWord[depth], 0);
-				wordList newInLine = { 0, 0, theWord[depth], 0 };
-				current->nextInLine = &newInLine;
+				current->nextInLine = createElement(0, 0, theWord[depth]);
 			}
 			// Make the current position the next in line
 			current = current->nextInLine;
@@ -171,7 +181,13 @@ int main(int argc, char **argv) {
 #endif
 
 	// Print the output
-//	printStructure(&myWordList, 0, 0);
+	printStructure(&myWordList, 0, 0);
+
+	unsigned long long int s =  sizeof(wordList);
+	printf("Size:\t%u\r\n",(unsigned int)s);
+
+	free(myWordList.nextInLine);
+	free(myWordList.nextLine);
 
 	return 0;
 }
