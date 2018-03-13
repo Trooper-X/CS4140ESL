@@ -169,9 +169,8 @@ void scanRoutine(wordList *lst){
 	uint8_t length = 0;
 	// Read per character
 	while((c = getchar()) != EOF){
-		c |= (1<<5);	// All lowercase
 		// Add to word if it is a character
-		if( ((c >= 48) && (c <= 57)) || ((c >= 97) && (c <= 122)) ){
+		if( ((c >= 48) && (c <= 57)) || ((c >= 65) && (c <= 90)) || ((c >= 97) && (c <= 122)) ){
 			word[length] = c;
 			length++;
 		}
