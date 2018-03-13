@@ -14,7 +14,7 @@
 #include <string.h>
 
 // Defines:
-#define VERBOSE 1
+#define VERBOSE 0
 
 /**
  * Defines how the linked list should look like.
@@ -179,10 +179,12 @@ void scanRoutine(wordList *lst){
 		else{
 			// If there is a word in the buffer, add it.
 			if(length){
+#if VERBOSE > 40
 				printf(">\t");
 				for(uint8_t i = 0; i<length; i++)
 					printf("%c",word[i]);
 				printf("\r\n");
+#endif
 				listHandler(lst, word, length);
 				length = 0;
 			}
