@@ -197,6 +197,21 @@ void scanRoutine(wordList *lst){
 }
 
 /**
+ * Free memory of the list
+ * @param The list
+ */
+void freeList(wordList *lst){
+	// Step to next if it exists
+	if(lst->nextInLine)
+		freeList(lst->nextInLine);
+	if(lst->nextLine)
+		freeList(lst->nextLine);
+
+	// Free the current node
+	free(lst);
+}
+
+/**
  * This is the main function.
  * No input arguments have been implemented.
  */
@@ -205,17 +220,16 @@ int main(int argc, char **argv) {
 	printf("%s\r\n", __FUNCTION__);
 #endif
 	// Create root
-	wordList myWordList = {0,0,'0',0};
+	wordList *myWordList = createElement(0,0,'0');
 
 	// Read the input
-	scanRoutine(&myWordList);
+	scanRoutine(myWordList);
 
 	// Print the output
-	printStructure(&myWordList, 0, 0);
+	printStructure(myWordList, 0, 0);
 
 	// Free the memory :D
-	free(myWordList.nextInLine);
-	free(myWordList.nextLine);
+	freeList(myWordList);
 
 	return 0;
 }
