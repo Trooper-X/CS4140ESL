@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
 // Defines:
@@ -164,14 +163,17 @@ void scanRoutine(wordList *lst){
 #if VERBOSE > 20
 	printf("%s\r\n", __FUNCTION__);
 #endif
-	char c;
+	int c;
 	char word[255];
 	uint8_t length = 0;
 	// Read per character
 	while((c = getchar()) != EOF){
+#if VERBOSE > 40
+		printf("[%c]\t%d\r\n", c, c);
+#endif
 		// Add to word if it is a character
 		if( ((c >= 48) && (c <= 57)) || ((c >= 65) && (c <= 90)) || ((c >= 97) && (c <= 122)) ){
-			word[length] = c;
+			word[length] = (char) c;
 			length++;
 		}
 		// End of word
